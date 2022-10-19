@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=root
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./server/database-seed.sql:/docker-entrypoint-initdb.d/database-seed.sql
+  pgadmin-compose:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "placeholder@example.com"
+      PGADMIN_DEFAULT_PASSWORD: "fakepassword123!"
+    ports:
+      - "16543:80"
+    depends_on:
+      - postgres
+  server:
+    build: ./server
+    container_name: sercer_c
+    depends_on:
+      - postgres
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./server:/usr/src/app/
+      - /usr/src/app/node_modules 
+  # client:
+  #   build: ./client
+  #   container_name: client_c
+  #   image: node:16-alpine
+  #   expose:
+  #     - 8000
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./client:/usr/src/app/
+  #     - /usr/src/app/node_modules
+  #   stdin_open: true
+  #   tty : true
